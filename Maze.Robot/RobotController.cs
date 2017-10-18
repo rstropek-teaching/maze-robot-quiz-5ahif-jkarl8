@@ -1,4 +1,6 @@
 ﻿using Maze.Library;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace Maze.Solver
 {
@@ -8,6 +10,8 @@ namespace Maze.Solver
     public class RobotController
     {
         private IRobot robot;
+        private bool reachedEnd = false;
+        private List<Point> points;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobotController"/> class
@@ -17,6 +21,7 @@ namespace Maze.Solver
         {
             // Store robot for later use
             this.robot = robot;
+            points = new List<Point>();
         }
 
         /// <summary>
@@ -31,15 +36,52 @@ namespace Maze.Solver
         /// </remarks>
         public void MoveRobotToExit()
         {
-            // Here you have to add your code
-
-            // Trivial sample algorithm that can just move right
-            var reachedEnd = false;
             robot.ReachedExit += (_, __) => reachedEnd = true;
 
-            while (!reachedEnd)
+            check(new Point(0, 0));
+
+            if (!reachedEnd)
             {
-                robot.Move(Direction.Right);
+                robot.HaltAndCatchFire();
+            }
+        }
+
+        public void check(Point point)
+        {
+            if (!points.Contains(point) && !reachedEnd)
+            {
+                points.Add(point);
+                if (robot.TryMove(Direction.Left))
+                {
+                    check(new Point(point.X - 1, point.Y));
+                    if (!reachedEnd) {
+                        robot.Move(Direction.Right);
+                    }
+                }
+
+                if (!reachedEnd && robot.TryMove(Direction.Right))
+                {
+                    check(new Point(point.X + 1, point.Y));
+                    if (!reachedEnd) {
+                        robot.Move(Direction.Left);
+                    }
+                }
+
+                if (!reachedEnd && robot.TryMove(Direction.Down))
+                {
+                    check(new Point(point.X, point.Y + 1));
+                    if (!reachedEnd) {
+                        robot.Move(Direction.Up);
+                    }
+                }
+
+                if (!reachedEnd && robot.TryMove(Direction.Up))
+                {
+                    check(new Point(point.X, point.Y - 1));
+                    if (!reachedEnd) {
+                        robot.Move(Direction.Down);
+                    }
+                }
             }
         }
     }
