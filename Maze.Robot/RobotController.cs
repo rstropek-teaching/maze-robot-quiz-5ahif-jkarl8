@@ -46,6 +46,7 @@ namespace Maze.Solver
             }
         }
 
+        // Tip: C# member names should start with an uppercase letter.
         public void check(Point point)
         {
             if (!points.Contains(point) && !reachedEnd)
